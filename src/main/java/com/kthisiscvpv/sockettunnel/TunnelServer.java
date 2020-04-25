@@ -46,11 +46,10 @@ public class TunnelServer extends WebSocketServer
 				if (clients != null)
 				{
 					clients.remove(conn);
-					roomClient.put(room, clients);
-					clients.remove(conn);
 				}
 			}
 		}
+		this.clients.remove(conn);
 	}
 
 	private void addClient(WebSocket conn, Client client)
@@ -64,12 +63,17 @@ public class TunnelServer extends WebSocketServer
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote)
 	{
-		log.debug("{} has disconnected", conn.getRemoteSocketAddress().getAddress().getHostAddress());
 		Client client = clients.get(conn);
 		if (client != null)
 		{
-			sendToRoom(conn, gson.toJson(new ServerMessage(gson.toJson(new Leave(client.getName()), ClientsocketMessage.class))));
 			removeClient(conn);
+			sendToRoom(client.getRoom(), gson.toJson(new ServerMessage(gson.toJson(new Leave(client.getName()), ClientsocketMessage.class))));
+
+			log.debug("{} has disconnected", client.getName());
+		}
+		else
+		{
+			log.debug("{} has disconnected", conn);
 		}
 	}
 
@@ -82,23 +86,17 @@ public class TunnelServer extends WebSocketServer
 			Object room = client.getRoom();
 			if (room != null)
 			{
-				sendToRoom(room, conn, message);
+				sendToRoom(room, message);
 			}
 		}
 	}
 
-	private void sendToRoom(Object room, WebSocket conn, String message)
+	private void sendToRoom(Object room, String message)
 	{
 		HashSet<WebSocket> clients = roomClient.get(room);
 		if (clients != null)
 		{
-			clients.forEach(client ->
-			{
-				if (!client.equals(conn))
-				{
-					client.send(message);
-				}
-			});
+			clients.forEach(client -> client.send(message));
 		}
 	}
 
@@ -120,7 +118,7 @@ public class TunnelServer extends WebSocketServer
 					removeClient(conn);
 				}
 				addClient(conn, new Client(join.getName(), join.getRoom()));
-				sendToRoom(room, conn, gson.toJson(new ServerMessage(gson.toJson(new Join(room,join.getName()), ClientsocketMessage.class))));
+				sendToRoom(room, gson.toJson(new ServerMessage(gson.toJson(new Join(room, join.getName()), ClientsocketMessage.class)), ClientsocketMessage.class));
 			}
 		}
 		else if (_message instanceof ClientMessage)

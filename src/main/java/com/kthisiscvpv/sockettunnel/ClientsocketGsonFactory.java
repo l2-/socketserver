@@ -30,6 +30,7 @@ import com.kthisiscvpv.sockettunnel.messages.ClientMessage;
 import com.kthisiscvpv.sockettunnel.messages.ClientsocketMessage;
 import com.kthisiscvpv.sockettunnel.messages.server.Join;
 import com.kthisiscvpv.sockettunnel.messages.ServerMessage;
+import com.kthisiscvpv.sockettunnel.messages.server.Leave;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,6 +45,7 @@ public class ClientsocketGsonFactory
 	{
 		final List<Class<? extends ClientsocketMessage>> messages = new ArrayList<>();
 		messages.add(Join.class);
+		messages.add(Leave.class);
 		messages.add(ClientMessage.class);
 		messages.add(ServerMessage.class);
 		MESSAGES = messages;
