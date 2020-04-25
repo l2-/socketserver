@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @Data
+// Message without encryption destined for interpretation by the server
 public class ServerMessage extends ClientsocketMessage
 {
 	private String message;
